@@ -9,7 +9,7 @@ export
 # Base overloads
        getindex, setindex!, eltype, length, to_index,
 # Abstract Ising exports
-       critical_temperature, sigma_values
+       critical_temperature, sigma_values, write_state, load_state
 
 ############################################################################
 #             Abstract Ising Hamiltonian Interface                         #
@@ -126,3 +126,7 @@ evaluated to `true`. This `Bool`ean may be, for example, the Metropolis acceptan
 @inline _base_accept_move!( condition::Bool, ham::AbstractIsing, site ) = (ham[site] = condition ? -ham[site] : ham[site]; nothing)
 
 @inline critical_temperature(::Type{<: AbstractIsing}, Jex) = 2 * Jex / asinh(one(Jex))
+
+using JLD2
+write_state(ham::AbstractIsing, filepath) = JLD2.save( filepath, sigma_values(ham) )
+load_state(filepath) = JLD2.load(filepath)

@@ -1,4 +1,3 @@
-using Parameters2JSON
 
 import ..Hamiltonians: Hamiltonian   # Automatically submodulizes this code
 export sweeps_per_export, Lattice, Hamiltonian, Observables, update_observables!

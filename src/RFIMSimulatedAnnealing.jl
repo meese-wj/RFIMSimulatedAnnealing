@@ -1,6 +1,6 @@
 module RFIMSimulatedAnnealing
 
-include(join("Lattice", "Lattices.jl"))
+include( joinpath("Lattices", "Lattices.jl") )
 include( joinpath( "Hamiltonians", "Hamiltonians.jl" ) )
 include( joinpath( "MonteCarloMethods", "MonteCarloMethods.jl" ) )
 

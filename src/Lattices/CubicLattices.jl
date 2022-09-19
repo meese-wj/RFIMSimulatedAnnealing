@@ -1,6 +1,4 @@
 
-using Parameters2JSON
-
 export CubicLattice2D, CubicLattice2DParams
 
 abstract type AbstractCubicLattice <: AbstractLattice end

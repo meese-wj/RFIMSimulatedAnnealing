@@ -1,4 +1,3 @@
-using Parameters2JSON
 
 # Automatically submodulizes this code
 import ..Hamiltonians: IterateByDoFType, Hamiltonian, DoF_energy_change, accept_move!

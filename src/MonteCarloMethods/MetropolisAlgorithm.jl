@@ -3,7 +3,7 @@
 import ..Hamiltonians: IterateByDoFType, Hamiltonian, DoF_energy_change, accept_move!
 export MetropolisParameters, metropolis_sweep!, thermalize!, sweep_and_measure!
 
-@jsonable struct MetropolisParameters{T <: AbstractFloat} <: AbstractMonteCarloParameters
+struct MetropolisParameters{T <: AbstractFloat} <: AbstractMonteCarloParameters
     βvalues::Vector{T}
     therm_sweeps::Int
     measure_sweeps::Int

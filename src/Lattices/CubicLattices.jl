@@ -5,7 +5,7 @@ abstract type AbstractCubicLattice <: AbstractLattice end
 parameters(latt::AbstractCubicLattice) = latt.params
 
 const NN_SQUARE_LATT = 4
-@jsonable struct CubicLattice2DParams
+struct CubicLattice2DParams
     Lx::Int
     Ly::Int
 end

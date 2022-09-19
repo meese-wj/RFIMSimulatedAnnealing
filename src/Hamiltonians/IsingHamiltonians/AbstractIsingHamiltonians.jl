@@ -35,7 +35,7 @@ function iterate(iter::HamiltonianIterator{<: AbstractIsing, IterateByDefault}, 
     ham = Hamiltonian(iter)
     spin_idx, = state
     next = (spin_idx + one(Int),)
-    return spin_idx <= length(ham) ? ((spin_idx, ham[spin_idx], next) : nothing
+    return spin_idx <= length(ham) ? ((spin_idx, ham[spin_idx]), next) : nothing
 end
 
 """

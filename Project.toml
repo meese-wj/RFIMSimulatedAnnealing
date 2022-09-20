@@ -4,6 +4,8 @@ name = "RFIMSimulatedAnnealing"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+PProf = "e4faabce-9ead-11e9-39d9-4379958e3056"
+Profile = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 

@@ -1,7 +1,7 @@
 
 import StaticArrays: @SVector, @MVector
 import Base: getindex, setindex!, to_index
-import ..Lattices: num_sites  # Automatically submodulizes this code
+import ..Lattices: num_sites, nearest_neighbors  # Automatically submodulizes this code
 
 export 
 # Base overloads
@@ -15,6 +15,8 @@ export
 
 abstract type AbstractIsing <: AbstractHamiltonian end
 abstract type AbstractIsingParameters <: AbstractHamiltonianParameters end
+
+spins(ham::AbstractIsing) = ham.spins
 
 @inline Base.getindex(ham::AbstractIsing, idx) = spins(ham)[idx]
 @inline Base.setindex!(ham::AbstractIsing, value, idx) = spins(ham)[idx] = value
@@ -53,7 +55,7 @@ end
 
 Traverse a `<:`[`AbstractIsing`](@ref) by the DoF type which is just a single Ising spin.
 """
-iterate(iter::HamiltonianIterator{T, IterateByDoFType}, state = (one(Int),)) where {T <: AbstractIsing} = iterate(HamiltonianIterator(Hamiltonian(iter), IterateByDefault))
+iterate(iter::HamiltonianIterator{T, IterateByDoFType}, state = (one(Int),)) where {T <: AbstractIsing} = iterate(HamiltonianIterator(Hamiltonian(iter), IterateByDefault), state)
 
 """
     sigma_values(::AbstractIsing)

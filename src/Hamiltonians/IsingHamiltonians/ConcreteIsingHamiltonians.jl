@@ -1,17 +1,17 @@
 # Main code for concrete Ising Hamiltonians
 
-export BasicIsingHamiltonian, IsingParameters
+export BasicIsingHamiltonian, BasicIsingParameters
 
-struct IsingParameters{T <: AbstractFloat} <: AbstractIsingParameters
+struct BasicIsingParameters{T <: AbstractFloat} <: AbstractIsingParameters
     Jex::T  # Ising exchanges. Jex > 0 is ferromagnetic
 end
-IsingParameters{T}(; J::T = 1. ) where {T <: AbstractFloat} = IsingParameters{T}( J )
+BasicIsingParameters{T}(; J::T = 1. ) where {T <: AbstractFloat} = BasicIsingParameters{T}( J )
 
 mutable struct BasicIsingHamiltonian{T <: AbstractFloat} <: AbstractIsing
-    params::IsingParameters{T}
+    params::BasicIsingParameters{T}
     spins::Vector{T}
 
-    function BasicIsingHamiltonian(latt, params::IsingParameters{T}) where T
+    function BasicIsingHamiltonian(latt, params::BasicIsingParameters{T}) where T
         ndofs = num_sites(latt)
         return new{T}(params, rand([one(T), -one(T)], ndofs))
     end

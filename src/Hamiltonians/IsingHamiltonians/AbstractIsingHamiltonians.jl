@@ -2,8 +2,6 @@
 import StaticArrays: @SVector, @MVector
 import Base: getindex, setindex!, to_index
 import ..Lattices: num_sites  # Automatically submodulizes this code
-import MuladdMacro: @muladd 
-using Roots: find_zero
 
 export 
 # Base overloads
@@ -62,7 +60,7 @@ iterate(iter::HamiltonianIterator{T, IterateByDoFType}, state = (one(Int),)) whe
 
 Return a `view` into the σ degrees of freedom.
 """
-@inline sigma_values(ham::AbstractIsing) = @view spins(ham)
+@inline sigma_values(ham::AbstractIsing) = @view spins(ham)[begin:end]
 
 """
     neighbor_field(::AbstractIsing, ::AbstractIsingParameters, latt, site)

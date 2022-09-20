@@ -1,5 +1,7 @@
 
-import ..Hamiltonians: energy, write_state
+import ..Hamiltonians: energy, write_state, num_DoF
+using Printf
+
 export anneal!, SA_datapath, SimulatedAnnealingParameters
 
 struct SimulatedAnnealingParameters{T <: Float64} <: AbstractMonteCarloParameters
@@ -23,16 +25,30 @@ end
 
 SA_datapath(pathprepend::String = "", args...) = pathprepend * SA_datapath(args...)
 
+function SA_info(timer, model, mc_params, iteration)
+    time = timer.time
+    total_sweeps = sweeps_per_export(mc_params) * thermalization_sweeps(mc_params)
+    sweep_rate = total_sweeps / time
+    update_rate = num_DoF(Hamiltonian(model)) * sweep_rate
+    @info "Iteration $iteration --> $(round(100 * iteration / length(temperatures(mc_params)); digits = 3))% complete."
+    println( @sprintf "    Total sweeps: %.3e" total_sweeps )
+    println( @sprintf "    Total time:   %.3e seconds" time )
+    println( @sprintf "    Sweep rate:   %.3e sweeps per second" sweep_rate )
+    println( @sprintf "    Update rate:  %.3e updates per second" update_rate )
+    return nothing
+end
+
 function anneal!(model::AbstractModel, mc_params::AbstractMonteCarloParameters, mc_sweep::Function, write_out = true, pathprepend = "")
     temperature_regimen = temperatures(mc_params)
     spe = sweeps_per_export(mc_params)
-    @inbounds for temperature ∈ temperature_regimen
+    @inbounds for (Tdx, temperature) ∈ enumerate(temperature_regimen)
         beta = 1 / temperature
         # TODO: write in the adaptive part
         # while not equilibrated
-        @inbounds for sweep ∈ (1:spe)
+        timer = @timed @inbounds for sweep ∈ (1:spe)
             thermalize!(model, beta, mc_params, mc_sweep)
         end
+        SA_info(timer, model, mc_params, Tdx)
         # end
         write_out ? write_state(Hamiltonian(model), SA_datapath(pathprepend, model, temperature)) : nothing
     end

@@ -27,7 +27,7 @@ SA_datapath(pathprepend::String = "", args...) = pathprepend * SA_datapath(args.
 
 function SA_info(timer, model, mc_params, iteration)
     time = timer.time
-    total_sweeps = sweeps_per_export(mc_params) * thermalization_sweeps(mc_params)
+    total_sweeps = thermalization_sweeps(mc_params)
     sweep_rate = total_sweeps / time
     update_rate = num_DoF(Hamiltonian(model)) * sweep_rate
     @info "Iteration $iteration --> $(round(100 * iteration / length(temperatures(mc_params)); digits = 3))% complete."
@@ -45,9 +45,7 @@ function anneal!(model::AbstractModel, mc_params::AbstractMonteCarloParameters, 
         beta = 1 / temperature
         # TODO: write in the adaptive part
         # while not equilibrated
-        timer = @timed @inbounds for sweep ∈ (1:spe)
-            thermalize!(model, beta, mc_params, mc_sweep)
-        end
+        timer = @timed thermalize!(model, beta, mc_params, mc_sweep)
         SA_info(timer, model, mc_params, Tdx)
         # end
         write_out ? write_state(Hamiltonian(model), SA_datapath(pathprepend, model, temperature)) : nothing

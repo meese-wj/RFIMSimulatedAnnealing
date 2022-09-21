@@ -13,7 +13,7 @@ struct BaseIsingModel{T <: AbstractFloat} <: AbstractModel
     end
 end
 
-ising_model = BaseIsingModel(64)
+ising_model = BaseIsingModel(16)
 # sa_params = SimulatedAnnealingParameters(2^10, 1, Float64[3, 2.75, 2.5, 2.25, 2, 1.75, 1.5])
 sa_params = SimulatedAnnealingParameters(10, 2^10, 0.05, Float64[8])
 @time anneal!(ising_model, sa_params, metropolis_sweep!, false)

@@ -23,8 +23,8 @@ sweeps_per_export(params::SimulatedAnnealingParameters) = thermalization_sweeps(
 tolerance(params::SimulatedAnnealingParameters) = params.tolerance
 temperatures(params::SimulatedAnnealingParameters) = params.temperatures
 
-function SA_datapath(model::AbstractModel, temperature)
-    return "SimulatedAnnealing_NDoFs=$(num_DoF(Hamiltonian(model)))_T=$temperature"
+function SA_datapath(model::AbstractModel, temperature, ext = "jld2")
+    return "SimulatedAnnealing_NDoFs=$(num_DoF(Hamiltonian(model)))_T=$temperature.$ext"
 end
 
 SA_datapath(pathprepend::String = "", args...) = joinpath(pathprepend, SA_datapath(args...))

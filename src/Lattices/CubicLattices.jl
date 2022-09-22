@@ -1,5 +1,6 @@
 
-export CubicLattice2D, CubicLattice2DParams
+import Base: size
+export size, CubicLattice2D, CubicLattice2DParams
 
 abstract type AbstractCubicLattice <: AbstractLattice end
 parameters(latt::AbstractCubicLattice) = latt.params
@@ -10,11 +11,13 @@ struct CubicLattice2DParams
     Ly::Int
 end
 reciprocal_type(::Type{CubicLattice2DParams}) = CubicLattice2D
+size(lattparams::CubicLattice2DParams) = (lattparams.Lx, lattparams.Ly)
 
 struct CubicLattice2D <: AbstractCubicLattice
     params::CubicLattice2DParams
     neighbors::Matrix{Int32}
 end
+size(latt::CubicLattice2D) = size(latt.params)
 @inline num_sites_CL2D(Lx, Ly) = Lx * Ly
 @inline num_sites_CL2D(lattparams) = num_sites_CL2D(lattparams.Lx, lattparams.Ly)
 @inline num_sites( latt::CubicLattice2D ) = num_sites_CL2D( latt.params )

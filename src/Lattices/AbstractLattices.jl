@@ -16,6 +16,7 @@ The `supertype` for all `Type`s of lattices one can dream of.
 
 One must define the following `methods` for each new (non-`abstract`) `AbstractLattice`:
 
+- [`Base.size`](@ref)
 - [`construct_lattice!`](@ref)
 - [`num_sites`](@ref)
 - [`site_index`](@ref)

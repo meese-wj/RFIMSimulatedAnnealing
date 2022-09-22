@@ -24,10 +24,10 @@ tolerance(params::SimulatedAnnealingParameters) = params.tolerance
 temperatures(params::SimulatedAnnealingParameters) = params.temperatures
 
 function SA_datapath(model::AbstractModel, temperature)
-    return "NDoFs=$(num_DoF(model))_T=$temperature"
+    return "SimulatedAnnealing_NDoFs=$(num_DoF(Hamiltonian(model)))_T=$temperature"
 end
 
-SA_datapath(pathprepend::String = "", args...) = pathprepend * SA_datapath(args...)
+SA_datapath(pathprepend::String = "", args...) = joinpath(pathprepend, SA_datapath(args...))
 
 function SA_info(timer, equilis, model, mc_params, iteration, beta)
     time = timer.time

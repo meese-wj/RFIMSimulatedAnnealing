@@ -128,5 +128,9 @@ evaluated to `true`. This `Bool`ean may be, for example, the Metropolis acceptan
 @inline critical_temperature(::Type{<: AbstractIsing}, Jex) = 2 * Jex / asinh(one(Jex))
 
 using JLD2
-write_state(ham::AbstractIsing, filepath) = JLD2.save( filepath, sigma_values(ham) )
+function write_state(ham::AbstractIsing, filepath, ext = ".jld2")
+    jld2_file = filepath * ext
+    σs = sigma_values(ham)
+    JLD2.@save "$jld2_file" σs
+end
 load_state(filepath) = JLD2.load(filepath)

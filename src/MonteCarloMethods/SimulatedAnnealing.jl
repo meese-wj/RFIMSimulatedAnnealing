@@ -29,17 +29,18 @@ end
 
 SA_datapath(pathprepend::String = "", args...) = pathprepend * SA_datapath(args...)
 
-function SA_info(timer, equilis, model, mc_params, iteration)
+function SA_info(timer, equilis, model, mc_params, iteration, beta)
     time = timer.time
     total_sweeps = equilis * total_measurements(mc_params) * thermalization_sweeps(mc_params)
     sweep_rate = total_sweeps / time
     update_rate = num_DoF(Hamiltonian(model)) * sweep_rate
-    @info "Adaptive Iteration $iteration --> $(round(100 * iteration / length(temperatures(mc_params)); digits = 3))% complete."
+    @info "Adaptive Iteration $iteration. T = $(round( 1 / beta ; digits = 3)) --> $(round(100 * iteration / length(temperatures(mc_params)); digits = 3))% complete."
     println( @sprintf "    Equilibrations: %d" equilis )
     println( @sprintf "    Total sweeps:   %.3e" total_sweeps )
     println( @sprintf "    Total time:     %.3e seconds" time )
     println( @sprintf "    Sweep rate:     %.3e sweeps per second" sweep_rate )
     println( @sprintf "    Update rate:    %.3e updates per second" update_rate )
+    println()
     return nothing
 end
 
@@ -49,7 +50,7 @@ function not_equilibrated(energy_obs, mc_params)
     part2 = @view energy_obs[(partition_divider + one(Int)):end]
     μ1, var1 = mean( part1 ), var( part1 )
     μ2, var2 = mean( part2 ), var( part2 )
-    condition_1::Bool = μ1 == μ2 == zero(μ1)
+    condition_1::Bool = μ1 ≈ μ2
     condition_2::Bool = (abs2( μ1 - μ2 ) <= var1) && ((abs(var1 - var2) / var1) <= tolerance(mc_params)) 
     return !(condition_1 || condition_2)
 end
@@ -77,7 +78,7 @@ function anneal!(model::AbstractModel, mc_params::AbstractMonteCarloParameters, 
         # # while not equilibrated
         # timer = @timed thermalize!(model, beta, mc_params, mc_sweep)
         timer = @timed equilibrate!(model, energy_obs, beta, mc_params, mc_sweep)
-        SA_info(timer, timer.value, model, mc_params, Tdx)
+        SA_info(timer, timer.value, model, mc_params, Tdx, beta)
         # end
         write_out ? write_state(Hamiltonian(model), SA_datapath(pathprepend, model, temperature)) : nothing
     end

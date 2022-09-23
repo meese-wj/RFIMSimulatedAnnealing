@@ -25,13 +25,13 @@ using Random
 Random.seed!(42)
 
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
-const my_index::Int = parse(Int, ENV["SLURM_ARRAY_TASK_ID"])
+@show const my_index::Int = parse(Int, ENV["SLURM_ARRAY_TASK_ID"])
 
-const Lvalue = 16
-const Jex = 1.0
-const Deltah = 0.95 * Jex 
+@show const Lvalue = 16
+@show const Jex = 1.0
+@show const Deltah = 0.95 * Jex 
 bias_ratios = Float64[0, 0.0001, 0.001, 0.01, 0.1]
-hext_values = Deltah .* bias_ratios
+@show hext_values = Deltah .* bias_ratios
 
 include("../SA_RFIM_tests.jl")
 

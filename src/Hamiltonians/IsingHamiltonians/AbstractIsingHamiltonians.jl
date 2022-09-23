@@ -139,3 +139,5 @@ function write_state(ham::AbstractIsing, filepath)
     JLD2.@save "$jld2_file" σs
 end
 load_state(filepath) = JLD2.load(filepath)["σs"]
+
+relevant_parameters(ham::AbstractIsing) = ""

@@ -60,3 +60,5 @@ end
 
 @inline accept_move!(condition::Bool, ham::BasicIsingHamiltonian, site) = _base_accept_move!(condition, ham, site)
 @inline accept_move!(condition::Bool, ham::RandomFieldIsingHamiltonian, site) = _base_accept_move!(condition, ham, site)
+
+@inline relevant_parameters(ham::RandomFieldIsingHamiltonian, starter = "_") = starter * "hext=$(ham.params.hext)_Δh=$(ham.params.Δh)"

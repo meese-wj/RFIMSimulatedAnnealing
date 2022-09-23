@@ -15,7 +15,7 @@ anim = @animate for (Temp, σstate) ∈ zip(Tregimen, states)
                      aspect_ratio = :equal,
                      title = "\$T = $(round(Temp; digits = 3))\\, J\$" )
 end
-gif(anim, plotsdir("clean_tests.gif"), fps = 3)
+gif(anim, plotsdir("biased_tests.gif"), fps = 3)
 
 
 

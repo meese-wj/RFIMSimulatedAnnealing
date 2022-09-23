@@ -13,7 +13,7 @@
     echo $SLURM_NPROCS
     echo $SLURM_CPUS_PER_TASK
     echo
-    srun julia --threads=$SLURM_CPUS_PER_TASK clean_nmr_temp_sweep.jl
+    srun julia --threads=$SLURM_CPUS_PER_TASK parallel_annealing.jl
     exit
 =#
 using Pkg

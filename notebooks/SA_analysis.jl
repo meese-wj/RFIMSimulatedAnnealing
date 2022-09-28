@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.12
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -262,12 +262,12 @@ end
 
 # ╔═╡ 5cdcecc8-c2ab-4fc7-8264-f32df3b818a0
 md"""
-### Domain distribution
+### Domain distribution **OUTDATED**
 
 The Imry-Ma-Binder domain energy above a uniform ground-state in the presence of a magnetic field is given by 
 
 ```math
-E_d(\ell) = 2J\ell - \mathcal{C}\frac{\Delta h^2}{J} \ell \log \ell + 2 h_{\rm ex} \ell^2,
+E_d(\ell) = 2J\ell - \frac{1}{2}\mathcal{C}\frac{\Delta h^2}{J} \ell \log \ell + 2 h_{\rm ex} \ell^2,
 ```
 
 where $\mathcal{C}$ is a constant of order 1. One may estimate the distribution of domain sizes using the Boltzmann distribution as 
@@ -316,9 +316,9 @@ where $a = 2J$, $b = \mathcal{C} \Delta h^2 / J$, and $c_c = 2 \eta_c \Delta h$.
 
 ```math
 \begin{aligned}
-\ell_c &= \exp\left( 1 + \frac{2J^2}{\mathcal{C} \Delta h^2} \right),
+\ell_c &= \exp\left( 1 + \frac{4J^2}{\mathcal{C} \Delta h^2} \right),
 \\
-\eta_c &= \frac{\mathcal{C} \Delta h}{2 J} \exp\left[ -\left( 1 + \frac{2 J^2}{\mathcal{C} \Delta h^2} \right) \right]. 
+\eta_c &= \frac{\mathcal{C} \Delta h}{4 J} \exp\left[ -\left( 1 + \frac{4 J^2}{\mathcal{C} \Delta h^2} \right) \right]. 
 \end{aligned}
 ```
 
@@ -326,7 +326,8 @@ Then, with $h_{\rm ex}^{(c)} = \eta_c \Delta h$, we see that for small random fi
 """
 
 # ╔═╡ 872e4941-f5d9-4100-bf76-d914cfc83958
-hext_critical_point(J, Δh, C) = 0.5 * C * Δh^2 / J * exp( -(one(J) + 2 * J^2 / (C * Δh^2)) )
+hext_critical_point(J, Δh, C) = 0.5 * C * Δh^2 / J * exp( -(one(J) + 4 * J^2 / (C * Δh^2)) )
+# hext_critical_point(J, Δh, C) = 4 * J * exp( -(one(J) + 4 * J^2 / (C * Δh^2)) )
 
 # ╔═╡ 4010b366-49d9-4988-89e4-9160f5b59ca6
 hext_critical_point(J, Δh::AbstractArray, C) = [ hext_critical_point(J, dh, C) for dh ∈ Δh ]
@@ -366,7 +367,8 @@ breakup_constant(Rstar, Δh, J) = (Δh / J)^2 * log(Rstar)
 Cbreakup = breakup_constant(14, Deltah, Jex)
 
 # ╔═╡ 377722e3-9c4a-4a62-9309-f30252702998
-Edomain(x, hex, a = 2 * Jex, b = Cbreakup * Deltah^2 / Jex ) = a .* x .- b .* x .* log.(x) .+ 2 .* hex .* x .^2
+Edomain(x, hex, a = 2 * Jex, b = Deltah^2 / Jex, C = Cbreakup ) = a .* x .-  (0.5 * C * b) .* x .* log.(x) .+ (0.25 * C * b * hex) .* x .^2
+# Edomain(x, hex, a = 2 * Jex, b = Deltah^2 / Jex, C = Cbreakup ) = a .* x .-  (0.5 * C * b) .* x .* log.(x) .+ 2 .* hex .* x .^2
 
 # ╔═╡ 00c6756f-59f2-4750-b706-5a90c13f5196
 function partition_domain(hex, Temp)
@@ -377,18 +379,21 @@ end
 # ╔═╡ acb3df2e-5139-496f-8e51-1780da7c23a0
 domain_dist(x, hex, Temp) = exp.( -Edomain(x, hex) ./ Temp ) ./ partition_domain(hex, Temp)
 
+# ╔═╡ 2cd860e9-3049-45dc-9b9b-1c772148bfe5
+Edomain_deriv(x, hex, a = 2 * Jex, b = Deltah^2 / Jex, C = Cbreakup) = a .- (0.5 * C * b) .* ( log.(x) .+ one(b) ) .+ 2 .* (0.25 * C * b * hex) .* x
+# Edomain_deriv(x, hex, a = 2 * Jex, b = Deltah^2 / Jex, C = Cbreakup) = a .- (0.5 * C * b) .* ( log.(x) .+ one(b) ) .+ 4 .* hex .* x
+
 # ╔═╡ 4e618f33-ec1d-4e4e-a874-f162a25e2c9a
 let
-hvals = [0.1, 0.125, 0.135, 0.145, 0.15, 0.155, 0.156, 0.157, 0.16, 0.165, 0.185]
+hc = hext_critical_point(Jex, Deltah, Cbreakup)
+hrange = hc
+hvals = LinRange(hc - 0.25 * hrange, hc + hrange, 11)
 Lvals = LinRange(0.00001, 70, 5000)
 plot(Lvals, domain_dist(Lvals, hvals[Ddist_hdx], 0.5); label = false,
 	 fillrange = 0, fillalpha = 0.25,
 	 title = "\$ h_{\\mathrm{ex}} = $(round(hvals[Ddist_hdx]; digits = 5)) \\, J \$",
 	 xlabel = "Domain size \$ \\ell \$")
 end
-
-# ╔═╡ 2cd860e9-3049-45dc-9b9b-1c772148bfe5
-Edomain_deriv(x, hex, a = 2 * Jex, b = Cbreakup * Deltah^2 / Jex) = a .- b .* ( log.(x) .+ one(b) ) .+ 4 .* hex .* x
 
 # ╔═╡ bb6252da-2a9a-497b-9f7d-57ca978e3742
 let
@@ -462,7 +467,7 @@ end
 # ╟─02ce0000-7618-4480-9cf6-9a382f925767
 # ╠═4e618f33-ec1d-4e4e-a874-f162a25e2c9a
 # ╟─cc785a11-4e42-4917-a3c3-e495bfc24a4a
-# ╟─bb6252da-2a9a-497b-9f7d-57ca978e3742
+# ╠═bb6252da-2a9a-497b-9f7d-57ca978e3742
 # ╟─e945de17-b127-4fe2-b1f6-defd0a2e1d5c
 # ╟─342b5bd7-f989-4318-a4a3-0e0428279da2
 # ╠═872e4941-f5d9-4100-bf76-d914cfc83958

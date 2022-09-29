@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.11
+# v0.19.12
 
 using Markdown
 using InteractiveUtils
@@ -35,11 +35,11 @@ using Plots
 # ╔═╡ 61097b03-696d-40c5-801b-964a2bf885e3
 using Statistics
 
-# ╔═╡ f0a50e35-d4c7-4585-b2d6-8dc5b9cd90a9
-using FastGaussQuadrature, LinearAlgebra, Roots
-
 # ╔═╡ a66bee21-6b24-450b-b29a-4734d621d35e
 using FFTW
+
+# ╔═╡ f0a50e35-d4c7-4585-b2d6-8dc5b9cd90a9
+using FastGaussQuadrature, LinearAlgebra, IntervalRootFinding
 
 # ╔═╡ 7c482e32-dfec-4a64-a0c6-11071bb81671
 names(RFIMSimulatedAnnealing)
@@ -51,7 +51,8 @@ begin
 	@show const Deltah = 0.95 * Jex 
 	# bias_ratios = Float64[0, 0.0001, 0.001, 0.01, 0.1]
 	# bias_ratios = Float64[0, 0.01, 0.025, 0.05, 0.1]
-	bias_ratios = Float64[0.025, 0.03125, 0.0375, 0.04375, 0.05]
+	# bias_ratios = Float64[0.025, 0.03125, 0.0375, 0.04375, 0.05]
+	bias_ratios = Float64[0.001, 0.01, 0.0375, 0.05, 0.1]
 	@show hext_values = Deltah .* bias_ratios
 	const Tregimen = Float64[8, 7, 6, 5, 4.5, 4, 3.5, 3, 2.5, 2.375, 2.325, 2.275, 2.25, 2.20, 2.15, 2.125, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.1]
 end
@@ -118,25 +119,28 @@ SA_gif(all_states[idx]; fps = 4,
 					  * "\$, \\, \\Delta h = $(Deltah) \\, J \$" )
 end
 
+# ╔═╡ 5be70f7a-2664-43d3-9d70-8e914190782a
+four_plot_indices = [1, 2, 3, 5]
+
 # ╔═╡ dff5bb0b-c185-4c54-b1f3-334876a7e766
 @bind temperature_index html"""<input value="1" type="range" min="1" max="24"/>"""
 
 # ╔═╡ 04f20fa1-ca64-4928-9dfc-f051cdc2733d
 let
 
-idx = 1
+idx = four_plot_indices[1]
 plt1 = SA_heatmap(Tregimen[temperature_index], all_states[idx][temperature_index],
 	   	   "\$, \\, h_{\\mathrm{ex}} = $(round(hext_values[idx]; digits = 5)) \\, J \$" )
 
-idx = 2
+idx = four_plot_indices[2]
 plt2 = SA_heatmap(Tregimen[temperature_index], all_states[idx][temperature_index],
 	   	   "\$, \\, h_{\\mathrm{ex}} = $(round(hext_values[idx]; digits = 5)) \\, J \$" )
 
-idx = 3
+idx = four_plot_indices[3]
 plt3 = SA_heatmap(Tregimen[temperature_index], all_states[idx][temperature_index],
 	   	   "\$, \\, h_{\\mathrm{ex}} = $(round(hext_values[idx]; digits = 5)) \\, J \$" )
 
-idx = 4
+idx = four_plot_indices[4]
 plt4 = SA_heatmap(Tregimen[temperature_index], all_states[idx][temperature_index],
 	   	   "\$, \\, h_{\\mathrm{ex}} = $(round(hext_values[idx]; digits = 5)) \\, J \$" )
 
@@ -210,7 +214,7 @@ md"""
 
 # ╔═╡ d49c299e-4fd9-4097-b777-afcc079608e4
 let
-hdx = 2
+hdx = 3
 Tdx = RG_Tdx
 img = reshape(all_states[1][Tdx], Lvalue, Lvalue)
 plt = heatmap(img; clims = (-1, 1), aspect_ratio = :equal,  
@@ -248,53 +252,25 @@ end
 let
 Tdx = RG_hist_Tdx
 blevel = 8
-plt1 = histogram_RG_state(all_states[1][Tdx], blevel,
-					      "\$ h_{\\mathrm{ex}} / \\Delta h = $(round(bias_ratios[1]; 										digits = 5))\$")
-plt2 = histogram_RG_state(all_states[2][Tdx], blevel,
-					      "\$ h_{\\mathrm{ex}} / \\Delta h = $(round(bias_ratios[2]; 										digits = 5))\$")
-plt3 = histogram_RG_state(all_states[3][Tdx], blevel,
-					      "\$ h_{\\mathrm{ex}} / \\Delta h = $(round(bias_ratios[3]; 										digits = 5))\$")
-plt4 = histogram_RG_state(all_states[4][Tdx], blevel,
-					      "\$ h_{\\mathrm{ex}} / \\Delta h = $(round(bias_ratios[4]; 										digits = 5))\$")
+
+idx = four_plot_indices[1]
+plt1 = histogram_RG_state(all_states[idx][Tdx], blevel,
+					      "\$ h_{\\mathrm{ex}} / \\Delta h = $(round(bias_ratios[idx]; 										digits = 5))\$")
+
+idx = four_plot_indices[2]
+plt2 = histogram_RG_state(all_states[idx][Tdx], blevel,
+					      "\$ h_{\\mathrm{ex}} / \\Delta h = $(round(bias_ratios[idx]; 										digits = 5))\$")
+
+idx = four_plot_indices[3]
+plt3 = histogram_RG_state(all_states[idx][Tdx], blevel,
+					      "\$ h_{\\mathrm{ex}} / \\Delta h = $(round(bias_ratios[idx]; 										digits = 5))\$")
+
+idx = four_plot_indices[4]
+plt4 = histogram_RG_state(all_states[idx][Tdx], blevel,
+					      "\$ h_{\\mathrm{ex}} / \\Delta h = $(round(bias_ratios[idx]; 										digits = 5))\$")
 
 plot(plt1, plt2, plt3, plt4; plot_title = "\$ T = $(round(Tregimen[Tdx]; digits = 2))\\, J \$" )
 end
-
-# ╔═╡ 5cdcecc8-c2ab-4fc7-8264-f32df3b818a0
-md"""
-### Domain distribution **OUTDATED**
-
-The Imry-Ma-Binder domain energy above a uniform ground-state in the presence of a magnetic field is given by 
-
-```math
-E_d(\ell) = 2J\ell - \frac{1}{2}\mathcal{C}\frac{\Delta h^2}{J} \ell \log \ell + 2 h_{\rm ex} \ell^2,
-```
-
-where $\mathcal{C}$ is a constant of order 1. One may estimate the distribution of domain sizes using the Boltzmann distribution as 
-
-```math
-\rho_d(\ell) = \exp\left( \theta - \frac{E_d(\ell)}{T} \right),
-```
-
-with the constant $\theta$ being defined by 
-
-```math
-{\rm e}^{-\theta} = \int_1^\infty {\rm d}\ell\, \exp\left( -\frac{E_d(\ell)}{T} \right).
-```
-"""
-
-# ╔═╡ 3d1d77ab-5950-40c0-b4f3-4b6f5c9a0537
-md"""
-### Plot the low-temperature domain distribution
-"""
-
-# ╔═╡ 02ce0000-7618-4480-9cf6-9a382f925767
-@bind Ddist_hdx html"""<input value="1" type="range" min="1" max="11"/>"""
-
-# ╔═╡ cc785a11-4e42-4917-a3c3-e495bfc24a4a
-md"""
-### Finite domain sizes that minimize $E_d(\ell)$
-"""
 
 # ╔═╡ e945de17-b127-4fe2-b1f6-defd0a2e1d5c
 md"""
@@ -312,13 +288,13 @@ E_d(\ell) &= 0 = a \ell_c - b \ell_c \log \ell_c + c_c \ell_c^2,
 \end{aligned}
 ```
 
-where $a = 2J$, $b = \mathcal{C} \Delta h^2 / J$, and $c_c = 2 \eta_c \Delta h$. The solution is 
+where $a = 8J$, $b = (8/\mathcal{C})(\Delta h^2 / J)$, and $c_c = 2 \eta_c \Delta h$. The solution is 
 
 ```math
 \begin{aligned}
-\ell_c &= \exp\left( 1 + \frac{4J^2}{\mathcal{C} \Delta h^2} \right),
+\ell_c &= \exp\left[ -1 - \mathcal{C}\left(\frac{ J}{\Delta h} \right)^2 \right],
 \\
-\eta_c &= \frac{\mathcal{C} \Delta h}{4 J} \exp\left[ -\left( 1 + \frac{4 J^2}{\mathcal{C} \Delta h^2} \right) \right]. 
+\eta_c &= \frac{4\Delta h}{\mathcal{C} J} \exp\left[ -1 - \mathcal{C}\left(\frac{ J}{\Delta h} \right)^2 \right]. 
 \end{aligned}
 ```
 
@@ -326,11 +302,15 @@ Then, with $h_{\rm ex}^{(c)} = \eta_c \Delta h$, we see that for small random fi
 """
 
 # ╔═╡ 872e4941-f5d9-4100-bf76-d914cfc83958
-hext_critical_point(J, Δh, C) = 0.5 * C * Δh^2 / J * exp( -(one(J) + 4 * J^2 / (C * Δh^2)) )
-# hext_critical_point(J, Δh, C) = 4 * J * exp( -(one(J) + 4 * J^2 / (C * Δh^2)) )
+hext_critical_point(J, Δh, C) = 4 * Δh^2 / (C * J) * exp( -(one(J) + C * J^2 / Δh^2) )
 
 # ╔═╡ 4010b366-49d9-4988-89e4-9160f5b59ca6
 hext_critical_point(J, Δh::AbstractArray, C) = [ hext_critical_point(J, dh, C) for dh ∈ Δh ]
+
+# ╔═╡ 8b62b8b9-d14d-44e3-b4bc-7c4de63656bc
+md"""
+### Find the breakup length constant $\mathcal{C}$
+"""
 
 # ╔═╡ af3fc743-6c27-4e25-9b07-32c51b7a10fa
 let
@@ -366,42 +346,115 @@ breakup_constant(Rstar, Δh, J) = (Δh / J)^2 * log(Rstar)
 # ╔═╡ 19ad90fe-e071-4844-91bb-d348ce16eca5
 Cbreakup = breakup_constant(14, Deltah, Jex)
 
+# ╔═╡ 342b5bd7-f989-4318-a4a3-0e0428279da2
+let
+dhvals = 10.0 .^ LinRange(-1, 0.25, 100)
+hext_c = hext_critical_point( Jex, dhvals, Cbreakup )
+plot( dhvals, hext_c; 
+	  xlabel = "\$ \\Delta h \$", ylabel = "\$ h_{\\mathrm{ex}}^{(c)} \$", 
+      label = false, fillrange = minimum(hext_c), fillalpha = 0.25, 
+      linestyle = :dash, linewidth = 2.5)
+end
+
+# ╔═╡ 5cdcecc8-c2ab-4fc7-8264-f32df3b818a0
+md"""
+### Domain distribution
+
+The Imry-Ma-Binder domain energy above a uniform ground-state in the presence of a magnetic field is given by 
+
+```math
+E_d(\ell) = 8J\ell - \frac{8}{\mathcal{C}}\frac{\Delta h^2}{J} \ell \log \ell + 2 h_{\rm ex} \ell^2,
+```
+
+where $\mathcal{C}$ is a constant of order 1. One may estimate the distribution of domain sizes using the Boltzmann distribution as 
+
+```math
+\rho_d(\ell) = \exp\left( \theta - \frac{E_d(\ell)}{T} \right),
+```
+
+with the constant $\theta$ being defined by 
+
+```math
+{\rm e}^{-\theta} = \int_1^\infty {\rm d}\ell\, \exp\left( -\frac{E_d(\ell)}{T} \right).
+```
+"""
+
+# ╔═╡ 1607040a-d64d-465a-b7d1-0bb317994e83
+function domain_parameters(hex, J = Jex, Δh = Deltah, C = Cbreakup)
+	return 8 * J, 8 / C * (Δh^2 / J), 2 * hex
+end
+
 # ╔═╡ 377722e3-9c4a-4a62-9309-f30252702998
-Edomain(x, hex, a = 2 * Jex, b = Deltah^2 / Jex, C = Cbreakup ) = a .* x .-  (0.5 * C * b) .* x .* log.(x) .+ (0.25 * C * b * hex) .* x .^2
-# Edomain(x, hex, a = 2 * Jex, b = Deltah^2 / Jex, C = Cbreakup ) = a .* x .-  (0.5 * C * b) .* x .* log.(x) .+ 2 .* hex .* x .^2
+function Edomain(x, hex, J = Jex, Δh = Deltah, C = Cbreakup)
+	a, b, c = domain_parameters(hex, J, Δh, C)
+	return @. a * x - b * x * log(x) + c * x^2 
+end
+
+# ╔═╡ 2cd860e9-3049-45dc-9b9b-1c772148bfe5
+function Edomain_deriv(x, hex, J = Jex, Δh = Deltah, C = Cbreakup)
+	a, b, c = domain_parameters(hex, J, Δh, C)
+	one_num = one(a)
+	return @. a - b * ( log(x) + one_num ) + 2 * c * x
+end
 
 # ╔═╡ 00c6756f-59f2-4750-b706-5a90c13f5196
 function partition_domain(hex, Temp)
 	Lvals, weights = gausslaguerre(32)
-	return dot( weights, exp.(-Edomain(Lvals, hex) ./ Temp) .* exp.(Lvals))
+	Evals = Edomain(Lvals, hex)
+	return dot( weights, @. exp(-Evals / Temp) * exp(Lvals))
 end
 
 # ╔═╡ acb3df2e-5139-496f-8e51-1780da7c23a0
-domain_dist(x, hex, Temp) = exp.( -Edomain(x, hex) ./ Temp ) ./ partition_domain(hex, Temp)
+function domain_dist(x, hex, Temp) 
+	Evals = Edomain(x, hex)
+	return @. exp( -Evals / Temp ) / partition_domain(hex, Temp)
+end
 
-# ╔═╡ 2cd860e9-3049-45dc-9b9b-1c772148bfe5
-Edomain_deriv(x, hex, a = 2 * Jex, b = Deltah^2 / Jex, C = Cbreakup) = a .- (0.5 * C * b) .* ( log.(x) .+ one(b) ) .+ 2 .* (0.25 * C * b * hex) .* x
-# Edomain_deriv(x, hex, a = 2 * Jex, b = Deltah^2 / Jex, C = Cbreakup) = a .- (0.5 * C * b) .* ( log.(x) .+ one(b) ) .+ 4 .* hex .* x
+# ╔═╡ 3d1d77ab-5950-40c0-b4f3-4b6f5c9a0537
+md"""
+### Plot the low-temperature domain distribution
+"""
+
+# ╔═╡ 02ce0000-7618-4480-9cf6-9a382f925767
+begin
+	num_dists = 13
+	DdistString = "<input value=\"1\" type=\"range\" min=\"1\" max=\"$(num_dists)\"/>"
+	@bind Ddist_hdx HTML(DdistString)
+end
+
+# ╔═╡ 82a7920c-6094-4157-a66b-c7e175f5d70a
+begin
+	num_temps = 20
+	DdistTempString = "<input value=\"1\" type=\"range\" min=\"1\" max=\"$(num_temps)\"/>"
+	@bind Ddist_Tdx HTML(DdistTempString)
+end
 
 # ╔═╡ 4e618f33-ec1d-4e4e-a874-f162a25e2c9a
 let
 hc = hext_critical_point(Jex, Deltah, Cbreakup)
 hrange = hc
-hvals = LinRange(hc - 0.25 * hrange, hc + hrange, 11)
+hvals = LinRange(hc - 0.05 * hrange, hc + 0.025 * hrange, num_dists)
 Lvals = LinRange(0.00001, 70, 5000)
-plot(Lvals, domain_dist(Lvals, hvals[Ddist_hdx], 0.5); label = false,
+Tval = LinRange(0.1, 10, num_temps)[Ddist_Tdx]
+plot(Lvals, domain_dist(Lvals, hvals[Ddist_hdx], Tval); label = false,
 	 fillrange = 0, fillalpha = 0.25,
-	 title = "\$ h_{\\mathrm{ex}} = $(round(hvals[Ddist_hdx]; digits = 5)) \\, J \$",
+	 title = "\$ h_{\\mathrm{ex}} = $(round(hvals[Ddist_hdx]; digits = 5)) \\, J, \\quad T = $(round(Tval; digits = 3))\\, J \$",
 	 xlabel = "Domain size \$ \\ell \$")
 end
 
+# ╔═╡ cc785a11-4e42-4917-a3c3-e495bfc24a4a
+md"""
+### Finite domain sizes that minimize $E_d(\ell)$
+"""
+
 # ╔═╡ bb6252da-2a9a-497b-9f7d-57ca978e3742
 let
-hvals = LinRange(0.001, 0.25, 100)
+hc = hext_critical_point(Jex, Deltah, Cbreakup)
+hvals = LinRange(0.1 * hc, 2 * hc, 100)
 Lvals = similar(hvals)
 for (hdx, hval) ∈ enumerate(hvals)
 	val = zero(eltype(hvals))
-	try val = find_zero(x -> Edomain_deriv(x, hval), 10_000)
+	try val = find_zero(x -> Edomain_deriv(x, hval), 100_000)
 	catch DomainError
 		val = one(val)
 	end
@@ -413,16 +466,6 @@ plot(hvals, Lvals; markershape = :circle, yscale = :log10, label = false,
 hc = hext_critical_point(Jex, Deltah, Cbreakup)
 vline!([hc]; linestyle = :dash,
 	    label = "\$ h_{\\mathrm{ex}}^{(c)} = $(round(hc; digits = 5))\\, J \$", linewidth = 3, color = :orange)
-end
-
-# ╔═╡ 342b5bd7-f989-4318-a4a3-0e0428279da2
-let
-dhvals = 10.0 .^ LinRange(-1, 0.25, 100)
-hext_c = hext_critical_point( Jex, dhvals, Cbreakup )
-plot( dhvals, hext_c; 
-	  xlabel = "\$ \\Delta h \$", ylabel = "\$ h_{\\mathrm{ex}}^{(c)} \$", 
-      label = false, fillrange = minimum(hext_c), fillalpha = 0.25, 
-      linestyle = :dash, linewidth = 2.5)
 end
 
 # ╔═╡ Cell order:
@@ -441,9 +484,10 @@ end
 # ╠═da57e149-08d4-479c-8af1-5a79199508fb
 # ╠═73b4aca5-e66e-41e8-9f3e-c5d4e3941734
 # ╟─e462bdfd-d37d-4cb2-9481-1a019d2519ce
-# ╠═85d92807-333e-4a6b-a48e-ae1b33989c87
-# ╠═dff5bb0b-c185-4c54-b1f3-334876a7e766
-# ╠═04f20fa1-ca64-4928-9dfc-f051cdc2733d
+# ╟─85d92807-333e-4a6b-a48e-ae1b33989c87
+# ╠═5be70f7a-2664-43d3-9d70-8e914190782a
+# ╟─dff5bb0b-c185-4c54-b1f3-334876a7e766
+# ╟─04f20fa1-ca64-4928-9dfc-f051cdc2733d
 # ╟─fcdb8c53-ff49-44ce-ab78-84048a27803c
 # ╠═61097b03-696d-40c5-801b-964a2bf885e3
 # ╠═8d56ebaa-c76d-41e5-bc99-9a024d5b7d58
@@ -457,22 +501,25 @@ end
 # ╠═b0c2ff6a-08e1-4e66-86ba-de15c809f083
 # ╟─af4576e0-9a6f-4336-b0b2-9eba036a1051
 # ╟─38cd5744-ba2e-4798-ad60-3300457983c4
+# ╟─e945de17-b127-4fe2-b1f6-defd0a2e1d5c
+# ╠═872e4941-f5d9-4100-bf76-d914cfc83958
+# ╠═4010b366-49d9-4988-89e4-9160f5b59ca6
+# ╟─342b5bd7-f989-4318-a4a3-0e0428279da2
+# ╟─8b62b8b9-d14d-44e3-b4bc-7c4de63656bc
+# ╠═a66bee21-6b24-450b-b29a-4734d621d35e
+# ╟─af3fc743-6c27-4e25-9b07-32c51b7a10fa
+# ╠═3f71650d-63d7-4455-9d22-01cdd5c3800e
+# ╠═19ad90fe-e071-4844-91bb-d348ce16eca5
 # ╟─5cdcecc8-c2ab-4fc7-8264-f32df3b818a0
 # ╠═f0a50e35-d4c7-4585-b2d6-8dc5b9cd90a9
+# ╠═1607040a-d64d-465a-b7d1-0bb317994e83
 # ╠═377722e3-9c4a-4a62-9309-f30252702998
 # ╠═2cd860e9-3049-45dc-9b9b-1c772148bfe5
 # ╠═00c6756f-59f2-4750-b706-5a90c13f5196
 # ╠═acb3df2e-5139-496f-8e51-1780da7c23a0
 # ╟─3d1d77ab-5950-40c0-b4f3-4b6f5c9a0537
 # ╟─02ce0000-7618-4480-9cf6-9a382f925767
+# ╟─82a7920c-6094-4157-a66b-c7e175f5d70a
 # ╠═4e618f33-ec1d-4e4e-a874-f162a25e2c9a
 # ╟─cc785a11-4e42-4917-a3c3-e495bfc24a4a
-# ╠═bb6252da-2a9a-497b-9f7d-57ca978e3742
-# ╟─e945de17-b127-4fe2-b1f6-defd0a2e1d5c
-# ╟─342b5bd7-f989-4318-a4a3-0e0428279da2
-# ╠═872e4941-f5d9-4100-bf76-d914cfc83958
-# ╠═4010b366-49d9-4988-89e4-9160f5b59ca6
-# ╠═a66bee21-6b24-450b-b29a-4734d621d35e
-# ╠═af3fc743-6c27-4e25-9b07-32c51b7a10fa
-# ╠═3f71650d-63d7-4455-9d22-01cdd5c3800e
-# ╠═19ad90fe-e071-4844-91bb-d348ce16eca5
+# ╟─bb6252da-2a9a-497b-9f7d-57ca978e3742

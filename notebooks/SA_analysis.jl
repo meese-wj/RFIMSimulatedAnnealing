@@ -41,6 +41,9 @@ using FFTW
 # ╔═╡ f0a50e35-d4c7-4585-b2d6-8dc5b9cd90a9
 using FastGaussQuadrature, LinearAlgebra, IntervalRootFinding
 
+# ╔═╡ 73f6c72d-9995-4dad-87fa-eda04b7420a4
+using Roots
+
 # ╔═╡ 7c482e32-dfec-4a64-a0c6-11071bb81671
 names(RFIMSimulatedAnnealing)
 
@@ -149,6 +152,17 @@ plot(plt1, plt2, plt3, plt4;
 
 end
 
+# ╔═╡ 0218e69f-db93-4f18-9fd9-29fcacdfb2f3
+@bind temperature_index2 html"""<input value="1" type="range" min="1" max="24"/>"""
+
+
+# ╔═╡ d96c579b-be81-4d03-834e-072d90c6e75f
+let
+idx = four_plot_indices[3]
+plt1 = SA_heatmap(Tregimen[temperature_index2], all_states[idx][temperature_index2],
+	   	   "\$, \\, h_{\\mathrm{ex}} = $(round(hext_values[idx]; digits = 5)) \\, J \$")
+end
+
 # ╔═╡ fcdb8c53-ff49-44ce-ab78-84048a27803c
 md"""
 ## Decimation: real-space renormalization
@@ -234,10 +248,12 @@ md"""
 function histogram_RG_state(state, blevel, title = false)
 	img = reshape(state, Lvalue, Lvalue)
 	RGimg = decimate(img; bx = blevel, by = blevel)
-	histogram(RGimg[:]; label = false, normalize = true,
+	histogram(RGimg[:]; label = false, normalize = false,
 		  		xlabel = "Renormalized \$\\sigma \$ with \$ b_x = b_y = $blevel \$",
 		  		xrange = (-1.2, 1.2),
-				title = title)
+				title = title,
+				bins = LinRange(-1.05, 1.05, 15),
+	)
 	vline!([mean(RGimg[:])]; 
 		   linestyle = :dash, 
 	       # label = "Mean \$ \\sigma^\\prime \$",
@@ -454,7 +470,7 @@ hvals = LinRange(0.1 * hc, 2 * hc, 100)
 Lvals = similar(hvals)
 for (hdx, hval) ∈ enumerate(hvals)
 	val = zero(eltype(hvals))
-	try val = find_zero(x -> Edomain_deriv(x, hval), 100_000)
+	try val = find_zero(x -> Edomain_deriv(x, hval), 10_000)
 	catch DomainError
 		val = one(val)
 	end
@@ -488,6 +504,8 @@ end
 # ╠═5be70f7a-2664-43d3-9d70-8e914190782a
 # ╟─dff5bb0b-c185-4c54-b1f3-334876a7e766
 # ╟─04f20fa1-ca64-4928-9dfc-f051cdc2733d
+# ╟─0218e69f-db93-4f18-9fd9-29fcacdfb2f3
+# ╟─d96c579b-be81-4d03-834e-072d90c6e75f
 # ╟─fcdb8c53-ff49-44ce-ab78-84048a27803c
 # ╠═61097b03-696d-40c5-801b-964a2bf885e3
 # ╠═8d56ebaa-c76d-41e5-bc99-9a024d5b7d58
@@ -520,6 +538,7 @@ end
 # ╟─3d1d77ab-5950-40c0-b4f3-4b6f5c9a0537
 # ╟─02ce0000-7618-4480-9cf6-9a382f925767
 # ╟─82a7920c-6094-4157-a66b-c7e175f5d70a
-# ╠═4e618f33-ec1d-4e4e-a874-f162a25e2c9a
+# ╟─4e618f33-ec1d-4e4e-a874-f162a25e2c9a
 # ╟─cc785a11-4e42-4917-a3c3-e495bfc24a4a
+# ╠═73f6c72d-9995-4dad-87fa-eda04b7420a4
 # ╟─bb6252da-2a9a-497b-9f7d-57ca978e3742

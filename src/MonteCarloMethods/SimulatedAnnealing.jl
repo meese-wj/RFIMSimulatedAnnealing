@@ -3,9 +3,19 @@ import ..Hamiltonians: energy, write_state, num_DoF, relevant_parameters
 using Printf
 using Statistics
 
-export anneal!, SA_datapath, SimulatedAnnealingParameters
+export anneal!, logspace_temperatures, SA_datapath, SimulatedAnnealingParameters
 
 const SA_EQUILIBRATION_PARTITIONS::Int = 2
+
+function logspace_temperatures( Thigh, Tlow, Ntemps::Integer ) 
+    Thigh > zero(Thigh) ? nothing : throw(ArgumentError("Temperaures must be positive. Currently Thigh = $Thigh."))
+    Tlow > zero(Tlow) ? nothing : throw(ArgumentError("Temperaures must be positive. Currently Tlow = $Tlow."))
+    Ntemps > zero(Ntemps) ? nothing : throw(ArgumentError("Number of temperaures must be positive. Currently Ntemps = $Ntemps."))
+    
+    min_idx, max_idx = zero(Ntemps), Ntemps - one(Ntemps)
+    idx_range = (min_idx:max_idx)
+    return Thigh * (Tlow / Thigh) .^ ( idx_range ./ max_idx )
+end
 
 struct SimulatedAnnealingParameters{T <: Float64} <: AbstractMonteCarloParameters
     therm_sweeps::Int        # Sweeps to thermalize before recording the energy at a given temperature (probably 1-10)

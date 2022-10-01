@@ -1,13 +1,13 @@
 #!/usr/bin/bash -l
-#SBATCH --time=5:00:00
+#SBATCH --time=23:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=5
 #SBATCH --mem=10g
 #SBATCH --mail-type=all
 #SBATCH --mail-user=meese022@umn.edu
 #SBATCH --array=1-5
-#SBATCH --job-name=L-128_%A_%a.out
-#SBATCH -o %x-%j.out
+#SBATCH --job-name=L-512
+#SBATCH -o %x-%A_%a.out
 #=
     pwd
     echo $SLURM_NPROCS
@@ -27,10 +27,12 @@ Random.seed!(42)
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 @show const my_index::Int = parse(Int, ENV["SLURM_ARRAY_TASK_ID"])
 
-@show const Lvalue = 16
+@show const Lvalue = 512
 @show const Jex = 1.0
 @show const Deltah = 0.95 * Jex 
-bias_ratios = Float64[0, 0.0001, 0.001, 0.01, 0.1]
+# bias_ratios = Float64[0, 0.0001, 0.001, 0.01, 0.1]
+# bias_ratios = Float64[0, 0.01, 0.025, 0.05, 0.1]
+bias_ratios = Float64[0.025, 0.03125, 0.0375, 0.04375, 0.05]
 @show hext_values = Deltah .* bias_ratios
 
 include("../SA_RFIM_tests.jl")

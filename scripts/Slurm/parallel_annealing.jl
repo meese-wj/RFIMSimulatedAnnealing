@@ -1,11 +1,11 @@
 #!/usr/bin/bash -l
-#SBATCH --time=23:00:00
+#SBATCH --time=50:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=5
 #SBATCH --mem=10g
 #SBATCH --mail-type=all
 #SBATCH --mail-user=meese022@umn.edu
-#SBATCH --array=1-5
+#SBATCH --array=1-6
 #SBATCH --job-name=L-512
 #SBATCH -o %x-%A_%a.out
 #=
@@ -32,7 +32,8 @@ const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 @show const Deltah = 0.95 * Jex 
 # bias_ratios = Float64[0, 0.0001, 0.001, 0.01, 0.1]
 # bias_ratios = Float64[0, 0.01, 0.025, 0.05, 0.1]
-bias_ratios = Float64[0.025, 0.03125, 0.0375, 0.04375, 0.05]
+# bias_ratios = Float64[0.025, 0.03125, 0.0375, 0.04375, 0.05]
+bias_ratios = Float64[0.001, 0.01, 0.0375, 0.04192, 0.05, 0.1]
 @show hext_values = Deltah .* bias_ratios
 
 include("../SA_RFIM_tests.jl")

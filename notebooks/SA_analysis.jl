@@ -362,6 +362,9 @@ breakup_constant(Rstar, Δh, J) = (Δh / J)^2 * log(Rstar)
 # ╔═╡ 19ad90fe-e071-4844-91bb-d348ce16eca5
 Cbreakup = breakup_constant(14, Deltah, Jex)
 
+# ╔═╡ 800e4a20-9210-444e-8023-652bb13ca772
+hext_critical_point(Jex, Deltah, Cbreakup) / Deltah
+
 # ╔═╡ 342b5bd7-f989-4318-a4a3-0e0428279da2
 let
 dhvals = 10.0 .^ LinRange(-1, 0.25, 100)
@@ -521,6 +524,7 @@ end
 # ╟─38cd5744-ba2e-4798-ad60-3300457983c4
 # ╟─e945de17-b127-4fe2-b1f6-defd0a2e1d5c
 # ╠═872e4941-f5d9-4100-bf76-d914cfc83958
+# ╠═800e4a20-9210-444e-8023-652bb13ca772
 # ╠═4010b366-49d9-4988-89e4-9160f5b59ca6
 # ╟─342b5bd7-f989-4318-a4a3-0e0428279da2
 # ╟─8b62b8b9-d14d-44e3-b4bc-7c4de63656bc

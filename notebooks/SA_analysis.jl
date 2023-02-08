@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.12
+# v0.19.14
 
 using Markdown
 using InteractiveUtils
@@ -52,12 +52,14 @@ begin
 	@show const Lvalue = 512
 	@show const Jex = 1.0
 	@show const Deltah = 0.95 * Jex 
-	# bias_ratios = Float64[0, 0.0001, 0.001, 0.01, 0.1]
-	# bias_ratios = Float64[0, 0.01, 0.025, 0.05, 0.1]
-	# bias_ratios = Float64[0.025, 0.03125, 0.0375, 0.04375, 0.05]
-	bias_ratios = Float64[0.001, 0.01, 0.0375, 0.05, 0.1]
+	# const bias_ratios = Float64[0, 0.0001, 0.001, 0.01, 0.1]
+	# const bias_ratios = Float64[0, 0.01, 0.025, 0.05, 0.1]
+	# const bias_ratios = Float64[0.025, 0.03125, 0.0375, 0.04375, 0.05]
+	# const bias_ratios = Float64[0.001, 0.01, 0.0375, 0.05, 0.1]
+	const bias_ratios = Float64[0.001, 0.01, 0.0375, 0.04192, 0.05, 0.1]
 	@show hext_values = Deltah .* bias_ratios
-	const Tregimen = Float64[8, 7, 6, 5, 4.5, 4, 3.5, 3, 2.5, 2.375, 2.325, 2.275, 2.25, 2.20, 2.15, 2.125, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.1]
+	# const Tregimen = Float64[8, 7, 6, 5, 4.5, 4, 3.5, 3, 2.5, 2.375, 2.325, 2.275, 2.25, 2.20, 2.15, 2.125, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.1]
+	const Tregimen = logspace_temperatures(8, 0.1, 50)
 end
 
 # ╔═╡ 96190616-8bf8-44e3-b429-640607a156df
@@ -112,7 +114,10 @@ function SA_gif(single_states; fps = 3, title_suffix = "")
 end
 
 # ╔═╡ e462bdfd-d37d-4cb2-9481-1a019d2519ce
-@bind bias_index html"""<input value="1" type="range" min="1" max="5"/>"""
+begin
+	hexindexString1 = "<input value=\"1\" type=\"range\" min=\"1\" max=\"$(length(bias_ratios))\"/>"
+	@bind bias_index HTML(hexindexString1)
+end
 
 # ╔═╡ 85d92807-333e-4a6b-a48e-ae1b33989c87
 let
@@ -123,10 +128,13 @@ SA_gif(all_states[idx]; fps = 4,
 end
 
 # ╔═╡ 5be70f7a-2664-43d3-9d70-8e914190782a
-four_plot_indices = [1, 2, 3, 5]
+four_plot_indices = [2, 3, 4, 6]
 
 # ╔═╡ dff5bb0b-c185-4c54-b1f3-334876a7e766
-@bind temperature_index html"""<input value="1" type="range" min="1" max="24"/>"""
+begin
+TindexString1 = "<input value=\"1\" type=\"range\" min=\"1\" max=\"$(length(Tregimen))\"/>"
+@bind temperature_index HTML(TindexString1)
+end
 
 # ╔═╡ 04f20fa1-ca64-4928-9dfc-f051cdc2733d
 let
@@ -153,8 +161,7 @@ plot(plt1, plt2, plt3, plt4;
 end
 
 # ╔═╡ 0218e69f-db93-4f18-9fd9-29fcacdfb2f3
-@bind temperature_index2 html"""<input value="1" type="range" min="1" max="24"/>"""
-
+@bind temperature_index2 HTML(TindexString1)
 
 # ╔═╡ d96c579b-be81-4d03-834e-072d90c6e75f
 let
@@ -262,7 +269,7 @@ function histogram_RG_state(state, blevel, title = false)
 end
 
 # ╔═╡ af4576e0-9a6f-4336-b0b2-9eba036a1051
-@bind RG_hist_Tdx html"""<input value="1" type="range" min="1" max="24"/>"""
+@bind RG_hist_Tdx HTML(TindexString1)
 
 # ╔═╡ 38cd5744-ba2e-4798-ad60-3300457983c4
 let
@@ -487,6 +494,45 @@ vline!([hc]; linestyle = :dash,
 	    label = "\$ h_{\\mathrm{ex}}^{(c)} = $(round(hc; digits = 5))\\, J \$", linewidth = 3, color = :orange)
 end
 
+# ╔═╡ 49d8fce2-0401-48e2-944d-5f49d0143327
+md"""
+## Spin up concentration as a function of $T$
+"""
+
+# ╔═╡ 218dac37-ec13-40ee-9d13-4e4b23d4a4fd
+up_concentration(state) = 0.5 * ( one(eltype(state)) + sum(@view state[:]) / length(state) )
+
+# ╔═╡ ff2dc227-d4d0-4fd8-95d6-788e0367b91f
+down_concentration(state) = one(eltype(state)) - up_concentration(state)
+
+# ╔═╡ a7e3dc41-0df1-48af-9ebd-dc37055599ed
+let
+plt = plot()
+for (eta_dx, η) ∈ enumerate(bias_ratios)
+	plot!(Tregimen, up_concentration.(all_states[eta_dx][:]); 
+	 markershape = :circle,
+	 xscale = :log10,
+	 label = "\$ \\eta = $(round(η; digits = 3)) \$",
+	 xlabel = "Temperature \$T\$",
+	 ylabel = "Spin up concentration"
+)
+end
+plt
+end
+
+# ╔═╡ 4e6c3ca9-8b6c-4672-ac9e-9770f95a9522
+let
+Tdx = length(Tregimen)
+plot(bias_ratios, 
+	  [ up_concentration(all_states[eta_dx][Tdx]) for eta_dx ∈ eachindex(bias_ratios) ]; 
+	  markershape = :circle,
+ 	  # xscale = :log10,
+ 	  label = false,
+ 	  xlabel = "Bias \$ \\eta \$",
+  	  ylabel = "Spin up concentration at \$ T = $(round(Tregimen[end]; digits = 3)) \\, J \$"
+)
+end
+
 # ╔═╡ Cell order:
 # ╠═2369d718-3b59-11ed-1243-7be9bca30bb0
 # ╠═c57a8de6-2380-4cc2-afe2-25c6f77bd568
@@ -521,7 +567,7 @@ end
 # ╟─bf091fd2-e561-49d5-b22d-306fe3fc1cea
 # ╠═b0c2ff6a-08e1-4e66-86ba-de15c809f083
 # ╟─af4576e0-9a6f-4336-b0b2-9eba036a1051
-# ╟─38cd5744-ba2e-4798-ad60-3300457983c4
+# ╠═38cd5744-ba2e-4798-ad60-3300457983c4
 # ╟─e945de17-b127-4fe2-b1f6-defd0a2e1d5c
 # ╠═872e4941-f5d9-4100-bf76-d914cfc83958
 # ╠═800e4a20-9210-444e-8023-652bb13ca772
@@ -546,3 +592,8 @@ end
 # ╟─cc785a11-4e42-4917-a3c3-e495bfc24a4a
 # ╠═73f6c72d-9995-4dad-87fa-eda04b7420a4
 # ╟─bb6252da-2a9a-497b-9f7d-57ca978e3742
+# ╠═49d8fce2-0401-48e2-944d-5f49d0143327
+# ╠═218dac37-ec13-40ee-9d13-4e4b23d4a4fd
+# ╠═ff2dc227-d4d0-4fd8-95d6-788e0367b91f
+# ╟─a7e3dc41-0df1-48af-9ebd-dc37055599ed
+# ╟─4e6c3ca9-8b6c-4672-ac9e-9770f95a9522
